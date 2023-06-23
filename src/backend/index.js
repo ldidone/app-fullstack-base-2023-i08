@@ -21,17 +21,59 @@ app.post('/device/',function(req,res){
         
         res.status(200)
         res.send("Todo ok");
-    }
-    
+    } 
 });
-app.get('/pepe/', function(req,res) {
+
+app.post('/updateStatus/', function(req, res){
+    console.log("llego = " + req.body.id);
+    if(req.body.id==undefined || req.body.id==null){
+        res.status(409);
+        res.send("Invalid ID");
+    }else{
+        var query = `UPDATE Devices SET state=${Boolean(req.body.status)} WHERE id=${req.body.id}`
+        utils.query(query, function(err, rsp,fields){
+            if(err==null){
+                res.status(200)
+                res.send("Updated successfully!");
+            } else {
+                res.status(500);
+                res.send("An error has happened when trying to update status.");
+            }
+        });
+        
+    } 
+});
+
+app.post('/deleteDevice/', function(req, res){
+    console.log("llego = " + req.body.id);
+    if(req.body.id==undefined || req.body.id==null){
+        res.status(409);
+        res.send("Invalid ID");
+    }else{
+        var query = `DELETE FROM Devices WHERE id=${req.body.id}`
+        utils.query(query, function(err, rsp,fields){
+            if(err==null){
+                res.status(200)
+                res.send("Deleted successfully!");
+            } else {
+                res.status(500);
+                res.send("An error has happened when trying to update status.");
+            }
+        });
+        
+    } 
+});
+
+
+app.get('/devices/', function(req,res) {
     utils.query("select * from Devices",function(err,rsp,fields){
-        if(err!=null)
-        res.send(JSON.stringify(rsp));
+        if(err==null){
+            res.send(JSON.stringify(rsp)).status(200);
+        }
     });
-  
 });
-app.get('/devices/', function(req, res, next) {
+
+/*app.get('/devices/', function(req, res, next) {
     devices = [
         { 
             'id': 1, 
@@ -50,7 +92,7 @@ app.get('/devices/', function(req, res, next) {
         },
     ]
     res.send(JSON.stringify(devices)).status(200);
-});
+});*/
 
 app.listen(PORT, function(req, res) {
     console.log("NodeJS API running correctly");
