@@ -1,20 +1,9 @@
 var M;
 
 class Main implements EventListenerObject,HttpResponse {
-    users: Array<Usuario> = new Array();
     framework: Framework = new Framework();
    
     constructor() {
-        var usr1 = new Usuario("mramos", "Matias");
-        var usr2 = new Usuario("jlopez", "Juan");
-
-
-        this.users.push(usr1);
-        this.users.push(usr2);
-
-        var obj = { "nombre": "Matias", "edad": 35, "masculino": true };
-        //alert(JSON.stringify(obj));
-
     }
     manejarRespueta(respueta: string) {
         var lista: Array<Device> = JSON.parse(respueta);
@@ -22,8 +11,8 @@ class Main implements EventListenerObject,HttpResponse {
         
         var ulDisp = document.getElementById("listaDisp");
         for (var disp of lista) {
-            var item: string = `<li class="collection-item avatar">`;
-                    if(disp.type==1){
+            var item: string = `<li class="collection-item avatar" id="li_${disp.id}">`;
+                    if(disp.type==0){
                       item+=  '<img src="static/images/lightbulb.png" alt = "" class="circle" >'
                     } else {
                         item+=  '<img src="static/images/window.png" alt = "" class="circle" >'
@@ -67,6 +56,8 @@ class Main implements EventListenerObject,HttpResponse {
         
     }
     obtenerDispositivo() {
+        var listDevices = document.getElementById('listaDisp');
+        listDevices.innerHTML = '';
         this.framework.ejecutarBackEnd("GET", "http://localhost:8000/devices", this);
     }
 
@@ -80,73 +71,68 @@ class Main implements EventListenerObject,HttpResponse {
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/deleteDevice", this, item)
     }
 
+    addDevice(deviceName, deviceDescription, deviceStatus, deviceType) {
+        var device = { 
+            "name": deviceName,
+            "description": deviceDescription,
+            "state": deviceStatus,
+            "type": deviceType
+        }
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/addDevice", this, device)
+    }
+
     handleEvent(event) {
         var elemento =<HTMLInputElement> event.target;
         console.log(elemento)
-        if (event.target.id == "btnListar") {
-            this.obtenerDispositivo();
-            for (var user of this.users) {
-
-                //TODO cambiar ESTO por mostrar estos datos separados por "-" 
-                //en un parrafo "etiqueta de tipo <p>"
-              
-            }
-        } else if (event.target.id == "btnLogin") {
-
-            var iUser = <HTMLInputElement>document.getElementById("iUser");
-            var iPass = <HTMLInputElement>document.getElementById("iPass");
-            var username: string = iUser.value;
-            var password: string = iPass.value;
-
-            if (username.length > 3 && password.length>3) {
-                
-                //iriamos al servidor a consultar si el usuario y la cotraseña son correctas
-                var parrafo = document.getElementById("parrafo");
-                parrafo.innerHTML = "Espere...";
-            } else {
-                alert("el nombre de usuario es invalido");
-            }
-
-        } else if (elemento.id.startsWith("ck_")) {
-            //Ir al backend y aviasrle que el elemento cambio de estado
-            //TODO armar un objeto json con la clave id y status y llamar al metodo ejecutarBackend
-           
-            alert("El elemento " + elemento.id + " cambia de estado a =" + elemento.checked);
+        if (event.target.id == "btnListar") {   
+            this.obtenerDispositivo(); 
+        } else if (elemento.id.startsWith("ck_")) {         
             this.updateStatus(elemento.id.replace('ck_', ''), elemento.checked)
-
         } else if (elemento.id.startsWith("del_")){
-            // alert("Eliminar")
+            var listDevices = document.getElementById('listaDisp');
+            var device = document.getElementById(elemento.id.replace('del_', 'li_'));
+            listDevices.removeChild(device);
             this.deleteDevice(elemento.id.replace('del_', ''))
-        } else {
+        } else if (event.target.id == "btnAgregar") {
             //TODO cambiar esto, recuperadon de un input de tipo text
             //el nombre  de usuario y el nombre de la persona
             // validando que no sean vacios
             // console.log("yendo al back");
             // this.framework.ejecutarBackEnd("POST", "http://localhost:8000/device", this, {});
-           
+           //alert("Agregar dispositivo")
+            var deviceName = (<HTMLInputElement>document.getElementById("deviceName")).value;
+            var deviceDescription = (<HTMLInputElement>document.getElementById("deviceDescription")).value;  
+            var deviceStatus = (<HTMLInputElement>document.getElementById("deviceStatus")).checked;
+            var deviceStatusNum = Number(deviceStatus);
+            var deviceType = (<HTMLInputElement>document.getElementById("deviceType")).value;
+
+            if ((deviceName != null) && (deviceName != "") && 
+                (deviceDescription != null) && (deviceDescription != "")) {
+                this.addDevice(deviceName, deviceDescription, deviceStatusNum, deviceType);
+                alert("¡Dispositivo agregado exitósamente!")
+                this.obtenerDispositivo(); 
+            } else {
+                alert("Debe completar el nombre y la descripción del dispositivo")
+            }           
         }
     }
 }
 
 
 window.addEventListener("load", () => {
-
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems,{});
-    var elemsC = document.querySelectorAll('.datepicker');
-    var instances = M.Datepicker.init(elemsC, {autoClose:true});
+
+    var elemsM = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elemsM, {});
 
     var main: Main = new Main();
     var btnListar: HTMLElement = document.getElementById("btnListar");
     btnListar.addEventListener("click", main);
-
-
-
 
     var btnAgregar: HTMLElement = document.getElementById("btnAgregar");
     btnAgregar.addEventListener("click", main);
 
     var btnLogin = document.getElementById("btnLogin");
     btnLogin.addEventListener("click", main);
-
 });
