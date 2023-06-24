@@ -4,5 +4,6 @@ class Device{
   public name: string;
   public state: boolean;
   public type: number;
+  public intensity: number;
 }
 

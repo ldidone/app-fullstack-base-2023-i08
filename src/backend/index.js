@@ -39,9 +39,27 @@ app.post('/updateStatus/', function(req, res){
                 res.status(500);
                 res.send("An error has happened when trying to update status.");
             }
-        });
-        
+        });     
     } 
+});
+
+app.post('/updateIntensity/', function(req, res){
+    console.log("llego = " + req.body.id);
+    if(req.body.id==undefined || req.body.id==null){
+        res.status(409);
+        res.send("Invalid ID");
+    }else{
+        var query = `UPDATE Devices SET intensity=${req.body.intensity} WHERE id=${req.body.id}`
+        utils.query(query, function(err, rsp,fields){
+            if(err==null){
+                res.status(200)
+                res.send("Updated successfully!");
+            } else {
+                res.status(500);
+                res.send("An error has happened when trying to update intensity.");
+            }
+        });     
+    }
 });
 
 app.post('/deleteDevice/', function(req, res){
@@ -70,8 +88,8 @@ app.post('/addDevice/', function(req, res){
         res.status(409);
         res.send("Invalid name or description.");
     } else {
-        var query = `INSERT INTO Devices (name, description, state, type) VALUES 
-            ('${req.body.name}', '${req.body.description}', ${req.body.state}, ${req.body.type});`
+        var query = `INSERT INTO Devices (name, description, state, type, intensity) VALUES 
+            ('${req.body.name}', '${req.body.description}', ${req.body.state}, ${req.body.type}, ${req.body.intensity});`
         utils.query(query, function(err, rsp,fields){
             if(err==null){
                 res.status(200)

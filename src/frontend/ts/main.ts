@@ -15,16 +15,22 @@ class Main implements EventListenerObject,HttpResponse {
         
         var ulDisp = document.getElementById("listaDisp");
         for (var disp of lista) {
+            var rangeMessage : string;
             var item: string = `<li class="collection-item avatar" id="li_${disp.id}">`;
                     if(disp.type==0){
-                      item+=  '<img src="static/images/lightbulb.png" alt = "" class="circle" >'
+                        rangeMessage = "Intensidad lámpara";
+                        item+=  '<img src="static/images/lightbulb.png" alt = "" class="circle" >'
                     } else {
+                        rangeMessage = "Apertura persiana";
                         item+=  '<img src="static/images/window.png" alt = "" class="circle" >'
-                    }
-                          
+                    }                  
                         item+=`<span class="titulo">${disp.name}</span>
                         <p>
                             ${disp.description}
+                        </p>
+                        <p class="range-field">
+                            <label>${rangeMessage}</label> 
+                            <input type="range" id="int_${disp.id}" min="0" max="100" value="${disp.intensity}"/>
                         </p>
                         <a href="#!" class="secondary-content">
                             <div class="switch">
@@ -60,6 +66,9 @@ class Main implements EventListenerObject,HttpResponse {
 
             var buttonEdit = document.getElementById("ed_" + disp.id);
             buttonEdit.addEventListener("click", this);
+
+            var rangeButton = document.getElementById("int_" + disp.id);
+            rangeButton.addEventListener("change", this);
         }
         
     }
@@ -93,17 +102,23 @@ class Main implements EventListenerObject,HttpResponse {
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateStatus", this, false, item)
     }
 
+    updateIntensity(id, intensity) {
+        var item = { "id": id, "intensity": intensity }
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateIntensity", this, false, item)
+    }
+
     deleteDevice(id) {
         var item = { "id": id }
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/deleteDevice", this, false, item)
     }
 
-    addDevice(deviceName, deviceDescription, deviceStatus, deviceType) {
+    addDevice(deviceName, deviceDescription, deviceStatus, deviceType, deviceIntensity) {
         var device = { 
             "name": deviceName,
             "description": deviceDescription,
             "state": deviceStatus,
-            "type": deviceType
+            "type": deviceType,
+            "intensity": deviceIntensity
         }
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/addDevice", this, false, device)
     }
@@ -146,10 +161,11 @@ class Main implements EventListenerObject,HttpResponse {
             var deviceStatus = (<HTMLInputElement>document.getElementById("deviceStatus")).checked;
             var deviceStatusNum = Number(deviceStatus);
             var deviceType = (<HTMLInputElement>document.getElementById("deviceType")).value;
+            var deviceIntensity = (<HTMLInputElement>document.getElementById("deviceIntensity")).value;
 
             if ((deviceName != null) && (deviceName != "") && 
                 (deviceDescription != null) && (deviceDescription != "")) {
-                this.addDevice(deviceName, deviceDescription, deviceStatusNum, deviceType);
+                this.addDevice(deviceName, deviceDescription, deviceStatusNum, deviceType, deviceIntensity);
                 alert("¡Dispositivo agregado exitósamente!")
                 if (this.showDevices) {
                     this.obtenerDispositivo(); 
@@ -173,6 +189,9 @@ class Main implements EventListenerObject,HttpResponse {
             } else {
                 alert("Debe completar el nombre y la descripción del dispositivo")
             }           
+        } else if (elemento.id.startsWith("int_")) {
+            var intensity = (<HTMLInputElement>document.getElementById(elemento.id)).value;
+            this.updateIntensity(elemento.id.replace('int_', ''), intensity);
         }
     }
 }
