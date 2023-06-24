@@ -93,6 +93,35 @@ app.get('/devices/', function(req,res) {
     });
 });
 
+app.get('/getDeviceInfo/', function(req, res) {
+    var device_id = req.query.id;
+    var query = `SELECT * FROM Devices WHERE id=${device_id}`
+    utils.query(query, function(err,rsp,fields){
+        if(err==null){
+            res.send(JSON.stringify(rsp)).status(200);
+        }
+    });
+});
+
+app.post('/updateDevice/', function(req, res){
+    if(req.body.name==undefined || req.body.name==null || 
+        req.body.description==undefined || req.body.description==null) {
+        res.status(409);
+        res.send("Invalid name or description.");
+    } else {
+        var query = `UPDATE Devices SET name='${req.body.name}', description='${req.body.description}', type=${req.body.type} WHERE id=${req.body.id}`
+        utils.query(query, function(err, rsp,fields){
+            if(err==null){
+                res.status(200)
+                res.send("Added successfully!");
+            } else {
+                res.status(500);
+                res.send("An error has happened when trying to update status.");
+            }
+        });    
+    } 
+});
+
 /*app.get('/devices/', function(req, res, next) {
     devices = [
         { 

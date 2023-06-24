@@ -1,12 +1,16 @@
 class Framework{
 
-  public ejecutarBackEnd(method:string,url:string,callback:HttpResponse,data?:any) {
+  public ejecutarBackEnd(method:string,url:string,callback:HttpResponse, isEdit:boolean, data?:any) {
     var xmlReq = new XMLHttpRequest();        
     xmlReq.onreadystatechange = () => {
         if (xmlReq.readyState == 4) {
           if (xmlReq.status == 200) {
             console.log("llego "+xmlReq.responseText)
+            if (isEdit) {
+              callback.mostrarDatosEdit(xmlReq.responseText);
+            } else {
               callback.manejarRespueta(xmlReq.responseText);
+            }       
             } else {
                 alert("Error al buscar los datos!");
             }

@@ -2,8 +2,12 @@ var M;
 
 class Main implements EventListenerObject,HttpResponse {
     framework: Framework = new Framework();
+    showDevices: Boolean;
    
     constructor() {
+        this.showDevices = false;
+        document.getElementById("deviceId").style.display = 'none';
+        document.getElementById("deviceIdDel").style.display = 'none';     
     }
     manejarRespueta(respueta: string) {
         var lista: Array<Device> = JSON.parse(respueta);
@@ -25,7 +29,7 @@ class Main implements EventListenerObject,HttpResponse {
                         <a href="#!" class="secondary-content">
                             <div class="switch">
                                 <label>
-                                    Off
+                                    Apagado
                                     `;
                                     if (disp.state) {
                                         item +=`<input type="checkbox" checked id="ck_${disp.id}">`;
@@ -34,13 +38,14 @@ class Main implements EventListenerObject,HttpResponse {
                                     }
                                     item += `
                                     <span class="lever"></span>
-                                    On
+                                    Encendido
                                 </label>
                             </div>
                         </a>
 
-                        <a class="waves-effect waves-light btn" id="del_${disp.id}"><i class="material-icons right">delete</i>Delete</a>
-                                           
+                        <a class="waves-effect waves-light btn modal-trigger" href="#modal2" id="ed_${disp.id}"><i class="material-icons right">edit</i>Editar</a>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#modal3" id="del_${disp.id}"><i class="material-icons right">delete</i>Eliminar</a>
+
                         </li>`;
             
             ulDisp.innerHTML += item;
@@ -52,23 +57,45 @@ class Main implements EventListenerObject,HttpResponse {
 
             var buttonDelete = document.getElementById("del_" + disp.id);
             buttonDelete.addEventListener("click", this);
+
+            var buttonEdit = document.getElementById("ed_" + disp.id);
+            buttonEdit.addEventListener("click", this);
         }
         
     }
+
+    mostrarDatosEdit(response: string) {
+        var lista: Array<Device> = JSON.parse(response);
+        if (lista.length > 0) {
+            var device = lista[0];
+            var id = <HTMLInputElement>document.getElementById("deviceId");
+            id.innerHTML = String(device.id);
+            var name = <HTMLInputElement>document.getElementById("deviceNameEdit");
+            name.value = device.name;
+            var description = <HTMLInputElement>document.getElementById("deviceDescriptionEdit");
+            description.value = device.description;
+            var type = <HTMLInputElement>document.getElementById("deviceTypeEdit");
+            type.value = String(device.type);
+
+            var elems = document.getElementById("deviceTypeEdit");
+            var instances = M.FormSelect.init(elems,{});
+        }
+    }
+
     obtenerDispositivo() {
         var listDevices = document.getElementById('listaDisp');
         listDevices.innerHTML = '';
-        this.framework.ejecutarBackEnd("GET", "http://localhost:8000/devices", this);
+        this.framework.ejecutarBackEnd("GET", "http://localhost:8000/devices", this, false);
     }
 
     updateStatus(id, status) {
         var item = { "id": id, "status": status }
-        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateStatus", this, item)
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateStatus", this, false, item)
     }
 
     deleteDevice(id) {
         var item = { "id": id }
-        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/deleteDevice", this, item)
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/deleteDevice", this, false, item)
     }
 
     addDevice(deviceName, deviceDescription, deviceStatus, deviceType) {
@@ -78,7 +105,21 @@ class Main implements EventListenerObject,HttpResponse {
             "state": deviceStatus,
             "type": deviceType
         }
-        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/addDevice", this, device)
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/addDevice", this, false, device)
+    }
+
+    getDeviceInfo(id) {
+        this.framework.ejecutarBackEnd("GET", "http://localhost:8000/getDeviceInfo?id="+id, this, true)
+    }
+
+    updateDevice(id, deviceName, deviceDescription, deviceType) {
+        var device = { 
+            "id": id,
+            "name": deviceName,
+            "description": deviceDescription,
+            "type": deviceType
+        }
+        this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateDevice", this, false, device)
     }
 
     handleEvent(event) {
@@ -86,20 +127,20 @@ class Main implements EventListenerObject,HttpResponse {
         console.log(elemento)
         if (event.target.id == "btnListar") {   
             this.obtenerDispositivo(); 
+            this.showDevices = true;
         } else if (elemento.id.startsWith("ck_")) {         
             this.updateStatus(elemento.id.replace('ck_', ''), elemento.checked)
-        } else if (elemento.id.startsWith("del_")){
+        } else if (elemento.id.startsWith("del_")) {
+            var id = <HTMLInputElement>document.getElementById("deviceIdDel");
+            id.innerHTML = elemento.id.replace('del_', '');
+        } else if (event.target.id == "btnEliminar"){
+            var deviceId = (<HTMLInputElement>document.getElementById("deviceIdDel")).innerHTML;
             var listDevices = document.getElementById('listaDisp');
-            var device = document.getElementById(elemento.id.replace('del_', 'li_'));
+            var device = document.getElementById('li_' + deviceId);
             listDevices.removeChild(device);
-            this.deleteDevice(elemento.id.replace('del_', ''))
+            this.deleteDevice(deviceId);
+            alert("¡Dispositivo eliminado exitósamente!")
         } else if (event.target.id == "btnAgregar") {
-            //TODO cambiar esto, recuperadon de un input de tipo text
-            //el nombre  de usuario y el nombre de la persona
-            // validando que no sean vacios
-            // console.log("yendo al back");
-            // this.framework.ejecutarBackEnd("POST", "http://localhost:8000/device", this, {});
-           //alert("Agregar dispositivo")
             var deviceName = (<HTMLInputElement>document.getElementById("deviceName")).value;
             var deviceDescription = (<HTMLInputElement>document.getElementById("deviceDescription")).value;  
             var deviceStatus = (<HTMLInputElement>document.getElementById("deviceStatus")).checked;
@@ -110,14 +151,31 @@ class Main implements EventListenerObject,HttpResponse {
                 (deviceDescription != null) && (deviceDescription != "")) {
                 this.addDevice(deviceName, deviceDescription, deviceStatusNum, deviceType);
                 alert("¡Dispositivo agregado exitósamente!")
-                this.obtenerDispositivo(); 
+                if (this.showDevices) {
+                    this.obtenerDispositivo(); 
+                }            
+            } else {
+                alert("Debe completar el nombre y la descripción del dispositivo")
+            }           
+        } else if (elemento.id.startsWith("ed_")) {
+            this.getDeviceInfo(elemento.id.replace('ed_', ''))          
+        } else if (event.target.id == "btnEditar") {
+            var deviceId = (<HTMLInputElement>document.getElementById("deviceId")).innerHTML;
+            var deviceName = (<HTMLInputElement>document.getElementById("deviceNameEdit")).value;
+            var deviceDescription = (<HTMLInputElement>document.getElementById("deviceDescriptionEdit")).value;
+            var deviceType = (<HTMLInputElement>document.getElementById("deviceTypeEdit")).value;
+
+            if ((deviceName != null) && (deviceName != "") && 
+                (deviceDescription != null) && (deviceDescription != "")) {
+                this.updateDevice(deviceId, deviceName, deviceDescription, deviceType);
+                alert("¡Dispositivo editado exitósamente!")
+                this.obtenerDispositivo();                            
             } else {
                 alert("Debe completar el nombre y la descripción del dispositivo")
             }           
         }
     }
 }
-
 
 window.addEventListener("load", () => {
     var elems = document.querySelectorAll('select');
@@ -133,6 +191,9 @@ window.addEventListener("load", () => {
     var btnAgregar: HTMLElement = document.getElementById("btnAgregar");
     btnAgregar.addEventListener("click", main);
 
-    var btnLogin = document.getElementById("btnLogin");
-    btnLogin.addEventListener("click", main);
+    var btnEditar = document.getElementById("btnEditar");
+    btnEditar.addEventListener("click", main);
+
+    var btnEliminar = document.getElementById("btnEliminar");
+    btnEliminar.addEventListener("click", main);
 });

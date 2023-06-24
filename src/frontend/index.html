@@ -16,24 +16,24 @@
     <body>
         <main>
             <!-- Navigation bar -->
-            <nav style="background-color:#124580">
+            <nav style="background-color:#052051">
                 <div class="nav-wrapper">
-                    <a href="#!" class="brand-logo left" style="margin-left: 15px;">Smart Home</a>
+                    <a href="#!" class="brand-logo left" style="margin-left: 15px;">Hogar inteligente</a>
                     <ul id="nav-mobile" class="right" style="margin-right: 15px;">
-                        <li><a href="#">Help</a></li>
+                        <li><a href="#">Ayuda</a></li>
                     </ul>
                 </div>
             </nav>	
             <!-- Page Body -->
             <div class="container">                
-                <h3>¡Cliente de casa inteligente!</h3>
+                <h3>¡Bienvenido a su hogar inteligente!</h3>
                 <div class="row">
                     <div class="col s12 m8 l4 xl6">
-                        <button class="btn waves-effect waves-light button-view" id="btnListar">Listar</button>
+                        <button class="btn waves-effect waves-light button-view" id="btnListar">Listar dispositivos</button>
                     </div>
                     <div class="col s12 m4 l8 xl6 ">
                         <!-- Modal Trigger -->
-                        <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Agregar</a>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Agregar dispositivo</a>
                     </div>
                 </div>
                 
@@ -81,6 +81,53 @@
                     </div>
                 </div>
 
+                <!-- Modal Structure -->
+                <div id="modal2" class="modal">
+                    <div class="modal-content">
+                        <h4>Editar dispositivo</h4>
+                        <div class="row">
+                            <form class="col s12">
+                              <div class="row">
+                                <div class="input-field col s6">
+                                    <input placeholder="" id="deviceNameEdit" type="text" class="validate">
+                                    <label for="deviceNameEdit">Nombre del dispositivo</label>
+                                </div>
+                                <div class="input-field col s6">
+                                    <input placeholder="" id="deviceDescriptionEdit" type="text" class="validate">
+                                    <label for="deviceDescriptionEdit">Descripción del dispositivo</label>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="input-field col s12">
+                                    <select id="deviceTypeEdit">
+                                        <option value="0">Lámpara</option>
+                                        <option value="1">Persiana</option>
+                                    </select>
+                                    <label>Seleccione el tipo de dispositivo</label>
+                                </div>                                                        
+                              </div>
+                              <label id="deviceId" visible="false"></label>
+                            </form>
+                          </div>           
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat" id="btnEditar">Editar</a>
+                    </div>
+                </div>
+
+                <div id="modal3" class="modal">
+                    <div class="modal-content">
+                        <h4>Eliminar</h4>
+                        <p>¿Está seguro que desea eliminar el dispositivo?</p> 
+                        <label id="deviceIdDel" visible="false"></label>        
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat" id="btnEliminar">Eliminar</a>
+                    </div>
+                </div>
+
                 <div >
                     <!-- Switch -->
                     <ul class="collection" id="listaDisp">                                      
@@ -89,15 +136,15 @@
             </div>	
         </main>
 		<!-- Page Footer -->
-        <footer class="page-footer" style="background-color:#124580">
+        <footer class="page-footer" style="background-color:#052051">
             <div class="container">
                 <div class="row">
                     <div class="col l6 s6">
-                        <h5 class="white-text">Smart Home</h5>
-                        <p class="grey-text text-lighten-4">Copyright ### - 2021</p>
+                        <h5 class="white-text">Hogar inteligente</h5>
+                        <p class="grey-text text-lighten-4">Copyright 2023</p>
                     </div>
                     <div class="col l6 s6">
-                        <h5 class="white-text right-align">Contact</h5>
+                        <h5 class="white-text right-align">Contáctenos</h5>
                         <p class="white-text right-align">
                             <a class="grey-text text-lighten-3" href="!#">Email | </a>
                             <a class="grey-text text-lighten-3" href="!#">Twitter | </a>
