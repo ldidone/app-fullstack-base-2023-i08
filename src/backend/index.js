@@ -12,20 +12,7 @@ app.use(express.json());
 app.use(express.static('/home/node/app/static/'));
 
 //=======[ Main module code ]==================================================
-app.post('/device/',function(req,res){
-    console.log("llego = "+req.body.id);
-    if(req.body.texto==undefined || req.body.texto==null || req.body.texto.length<4){
-        res.status(409);
-        res.send("el texto no es valido");
-    }else{
-        
-        res.status(200)
-        res.send("Todo ok");
-    } 
-});
-
 app.post('/updateStatus/', function(req, res){
-    console.log("llego = " + req.body.id);
     if(req.body.id==undefined || req.body.id==null){
         res.status(409);
         res.send("Invalid ID");
@@ -44,7 +31,6 @@ app.post('/updateStatus/', function(req, res){
 });
 
 app.post('/updateIntensity/', function(req, res){
-    console.log("llego = " + req.body.id);
     if(req.body.id==undefined || req.body.id==null){
         res.status(409);
         res.send("Invalid ID");
@@ -63,7 +49,6 @@ app.post('/updateIntensity/', function(req, res){
 });
 
 app.post('/deleteDevice/', function(req, res){
-    console.log("llego = " + req.body.id);
     if(req.body.id==undefined || req.body.id==null){
         res.status(409);
         res.send("Invalid ID");
@@ -139,27 +124,6 @@ app.post('/updateDevice/', function(req, res){
         });    
     } 
 });
-
-/*app.get('/devices/', function(req, res, next) {
-    devices = [
-        { 
-            'id': 1, 
-            'name': 'Lampara 1', 
-            'description': 'Luz living', 
-            'state': 0, 
-            'type': 1, 
-        },
-        { 
-            'id': 2, 
-            'name': 'Ventilador 1', 
-            'description': 'Ventilador Habitacion', 
-            'state': 1, 
-            'type': 2, 
-            
-        },
-    ]
-    res.send(JSON.stringify(devices)).status(200);
-});*/
 
 app.listen(PORT, function(req, res) {
     console.log("NodeJS API running correctly");

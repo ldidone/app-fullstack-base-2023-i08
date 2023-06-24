@@ -5,7 +5,6 @@ class Framework{
     xmlReq.onreadystatechange = () => {
         if (xmlReq.readyState == 4) {
           if (xmlReq.status == 200) {
-            console.log("llego "+xmlReq.responseText)
             if (isEdit) {
               callback.mostrarDatosEdit(xmlReq.responseText);
             } else {
@@ -24,8 +23,5 @@ class Framework{
     } else {
       xmlReq.send();
     }
-    
-//
   }
-
 }

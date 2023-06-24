@@ -57,6 +57,7 @@ class Main implements EventListenerObject,HttpResponse {
             ulDisp.innerHTML += item;
         }
         
+        // Suscribir inputs de los dispositivos a eventos
         for (var disp of lista) {
             var checkPrender = document.getElementById("ck_" + disp.id);
             checkPrender.addEventListener("click", this);
@@ -73,6 +74,7 @@ class Main implements EventListenerObject,HttpResponse {
         
     }
 
+    // Callback para completar los valores de un dispositivo en el modal de edición
     mostrarDatosEdit(response: string) {
         var lista: Array<Device> = JSON.parse(response);
         if (lista.length > 0) {
@@ -86,32 +88,38 @@ class Main implements EventListenerObject,HttpResponse {
             var type = <HTMLInputElement>document.getElementById("deviceTypeEdit");
             type.value = String(device.type);
 
+            // Es necesario re-inicializar el select
             var elems = document.getElementById("deviceTypeEdit");
             var instances = M.FormSelect.init(elems,{});
         }
     }
 
-    obtenerDispositivo() {
+    // Método para obtener todos los dispositivos de la DB
+    obtenerDispositivos() {
         var listDevices = document.getElementById('listaDisp');
         listDevices.innerHTML = '';
         this.framework.ejecutarBackEnd("GET", "http://localhost:8000/devices", this, false);
     }
 
+    // Método para actualizar el estado del dispositivo (encendido/apagado)
     updateStatus(id, status) {
         var item = { "id": id, "status": status }
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateStatus", this, false, item)
     }
 
+    // Método para actualizar la intensidad del dispositivo (intensidad lámpara o apertura persiana)
     updateIntensity(id, intensity) {
         var item = { "id": id, "intensity": intensity }
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/updateIntensity", this, false, item)
     }
 
+    // Método para eliminar dispositivos de la DB
     deleteDevice(id) {
         var item = { "id": id }
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/deleteDevice", this, false, item)
     }
 
+    // Método para añadir un nuevo dispositivo en la DB
     addDevice(deviceName, deviceDescription, deviceStatus, deviceType, deviceIntensity) {
         var device = { 
             "name": deviceName,
@@ -123,10 +131,12 @@ class Main implements EventListenerObject,HttpResponse {
         this.framework.ejecutarBackEnd("POST", "http://localhost:8000/addDevice", this, false, device)
     }
 
+    // Método para obtener un dispositivo específico de la DB
     getDeviceInfo(id) {
         this.framework.ejecutarBackEnd("GET", "http://localhost:8000/getDeviceInfo?id="+id, this, true)
     }
 
+    // Método para actualizar un dispositivo específico en la DB
     updateDevice(id, deviceName, deviceDescription, deviceType) {
         var device = { 
             "id": id,
@@ -138,17 +148,20 @@ class Main implements EventListenerObject,HttpResponse {
     }
 
     handleEvent(event) {
-        var elemento =<HTMLInputElement> event.target;
-        console.log(elemento)
+        var elemento =<HTMLInputElement> event.target;     
         if (event.target.id == "btnListar") {   
-            this.obtenerDispositivo(); 
-            this.showDevices = true;
-        } else if (elemento.id.startsWith("ck_")) {         
+            // Lógica a ejecutarse cuando se clickee el botón LISTAR DISPOSITIVO
+            this.obtenerDispositivos(); 
+            this.showDevices = true;       
+        } else if (elemento.id.startsWith("ck_")) {       
+            // Lógica a ejecutarse cuando se clickee el spinner del dispositivo  
             this.updateStatus(elemento.id.replace('ck_', ''), elemento.checked)
         } else if (elemento.id.startsWith("del_")) {
+            // Lógica a ejecutarse cuando se clickee el botón eliminar del dispositivo  
             var id = <HTMLInputElement>document.getElementById("deviceIdDel");
             id.innerHTML = elemento.id.replace('del_', '');
         } else if (event.target.id == "btnEliminar"){
+            // Lógica a ejecutarse cuando se clickee el botón eliminar del modal
             var deviceId = (<HTMLInputElement>document.getElementById("deviceIdDel")).innerHTML;
             var listDevices = document.getElementById('listaDisp');
             var device = document.getElementById('li_' + deviceId);
@@ -156,40 +169,42 @@ class Main implements EventListenerObject,HttpResponse {
             this.deleteDevice(deviceId);
             alert("¡Dispositivo eliminado exitósamente!")
         } else if (event.target.id == "btnAgregar") {
+            // Lógica a ejecutarse cuando se clickee el botón agregar del modal
             var deviceName = (<HTMLInputElement>document.getElementById("deviceName")).value;
             var deviceDescription = (<HTMLInputElement>document.getElementById("deviceDescription")).value;  
             var deviceStatus = (<HTMLInputElement>document.getElementById("deviceStatus")).checked;
             var deviceStatusNum = Number(deviceStatus);
             var deviceType = (<HTMLInputElement>document.getElementById("deviceType")).value;
             var deviceIntensity = (<HTMLInputElement>document.getElementById("deviceIntensity")).value;
-
             if ((deviceName != null) && (deviceName != "") && 
                 (deviceDescription != null) && (deviceDescription != "")) {
                 this.addDevice(deviceName, deviceDescription, deviceStatusNum, deviceType, deviceIntensity);
                 alert("¡Dispositivo agregado exitósamente!")
                 if (this.showDevices) {
-                    this.obtenerDispositivo(); 
+                    this.obtenerDispositivos(); 
                 }            
             } else {
                 alert("Debe completar el nombre y la descripción del dispositivo")
             }           
         } else if (elemento.id.startsWith("ed_")) {
+            // Lógica a ejecutarse cuando se clickee el editar del dispositivo
             this.getDeviceInfo(elemento.id.replace('ed_', ''))          
         } else if (event.target.id == "btnEditar") {
+            // Lógica a ejecutarse cuando se clickee el editar del modal
             var deviceId = (<HTMLInputElement>document.getElementById("deviceId")).innerHTML;
             var deviceName = (<HTMLInputElement>document.getElementById("deviceNameEdit")).value;
             var deviceDescription = (<HTMLInputElement>document.getElementById("deviceDescriptionEdit")).value;
             var deviceType = (<HTMLInputElement>document.getElementById("deviceTypeEdit")).value;
-
             if ((deviceName != null) && (deviceName != "") && 
                 (deviceDescription != null) && (deviceDescription != "")) {
                 this.updateDevice(deviceId, deviceName, deviceDescription, deviceType);
                 alert("¡Dispositivo editado exitósamente!")
-                this.obtenerDispositivo();                            
+                this.obtenerDispositivos();                            
             } else {
                 alert("Debe completar el nombre y la descripción del dispositivo")
             }           
         } else if (elemento.id.startsWith("int_")) {
+            // Lógica a ejecutarse cuando se modifique el valor del range (intensidad/apertura del dispositivo)
             var intensity = (<HTMLInputElement>document.getElementById(elemento.id)).value;
             this.updateIntensity(elemento.id.replace('int_', ''), intensity);
         }
@@ -197,22 +212,24 @@ class Main implements EventListenerObject,HttpResponse {
 }
 
 window.addEventListener("load", () => {
+    // Incialización de componentes de materialize
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems,{});
 
     var elemsM = document.querySelectorAll('.modal');
     var instances = M.Modal.init(elemsM, {});
 
+    // Suscripción de botones a eventos
     var main: Main = new Main();
     var btnListar: HTMLElement = document.getElementById("btnListar");
     btnListar.addEventListener("click", main);
-
+  
     var btnAgregar: HTMLElement = document.getElementById("btnAgregar");
     btnAgregar.addEventListener("click", main);
 
-    var btnEditar = document.getElementById("btnEditar");
+    var btnEditar: HTMLElement = document.getElementById("btnEditar");
     btnEditar.addEventListener("click", main);
 
-    var btnEliminar = document.getElementById("btnEliminar");
+    var btnEliminar: HTMLElement = document.getElementById("btnEliminar");
     btnEliminar.addEventListener("click", main);
 });
